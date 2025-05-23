@@ -4,42 +4,61 @@ const prevBtn = document.querySelector('.nav.prev');
 const nextBtn = document.querySelector('.nav.next');
 
 let currentIndex = 0;
-const totalSlides = slides.length;
 const intervalTime = 8000; // 8 seconds
 let autoSlideInterval;
+const totalSlides = slides.length;
 
+// Slide to a specific index
 function goToSlide(index) {
-  currentIndex = index % totalSlides;
-  track.style.transform = `translateX(-${currentIndex * 100}%)`;
+  track.style.transition = 'transform 1s ease-in-out';
+  track.style.transform = `translateX(-${index * 100}%)`;
+  currentIndex = index;
 }
 
+// Jump instantly (no animation)
+function jumpToStart() {
+  track.style.transition = 'none';
+  track.style.transform = `translateX(0%)`;
+  currentIndex = 0;
+}
+
+// Looping autoplay
 function nextSlide() {
-  goToSlide((currentIndex + 1) % totalSlides);
+  if (currentIndex < totalSlides - 1) {
+    goToSlide(currentIndex + 1);
+  } else {
+    goToSlide(currentIndex + 1); // Go to cloned slide
+    setTimeout(jumpToStart, 1000); // After transition, snap to Slide 1
+  }
 }
 
 function prevSlide() {
-  goToSlide((currentIndex - 1 + totalSlides) % totalSlides);
+  if (currentIndex === 0) {
+    jumpToStart();
+  } else {
+    goToSlide(currentIndex - 1);
+  }
 }
 
 function startAutoplay() {
   autoSlideInterval = setInterval(nextSlide, intervalTime);
 }
 
-function stopAutoplay() {
+function resetAutoplay() {
   clearInterval(autoSlideInterval);
-  startAutoplay(); // restart after click
+  startAutoplay();
 }
 
-nextBtn.addEventListener('click', () => {
-  stopAutoplay();
-  nextSlide();
-});
-
 prevBtn.addEventListener('click', () => {
-  stopAutoplay();
   prevSlide();
+  resetAutoplay();
 });
 
-// Start the carousel
+nextBtn.addEventListener('click', () => {
+  nextSlide();
+  resetAutoplay();
+});
+
+// Init
 goToSlide(0);
 startAutoplay();
